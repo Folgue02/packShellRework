@@ -1,0 +1,4 @@
+set name "Type your name in here"
+echo "These are the variables set in the shell:"
+set
+run test.psh

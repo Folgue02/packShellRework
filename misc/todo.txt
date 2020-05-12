@@ -1,0 +1,37 @@
+
+
+[x]- Addon feature into the shell. (shell.py)
+[x]- Plugin folder structure idea:
+	A folder with the plugin scripts, and a configuration file that referrs to the plugins:
+		C:\users\$user\.packShell
+		C:\users\$user\.packShell\config
+	
+	Configuration file: (config.json)
+		- Description about the plugin
+		- Name to be referred as command
+		- Required file.
+
+
+[x]- Plugin folder creation and parsing
+[x]- Implementation into the shell (python doesn't parse the arguments when the python file is directly called.)
+[x]- Function that installs plugins
+[x]- Functions to manage the plugins:
+	[o]- Create a file that works as library for the main packShell script. (Cancelled.)
+	[x]- Installer:
+		[ ]- Move multiple files feature in the installer
+
+	[x]- Remover
+	[x]- A function that lists all the plugins
+	[x]- Help function	
+
+
+[-]- Script reader function:
+	[x]- Extra file for the function (big project)
+	[-]- Libraries feature.
+
+[x]- Set command:
+	[x]- Integrate variables support in the shell object
+	[ ]- Modify parse function in the shell.py file in order to support variables.
+
+
+[o]- File editor (Above my skills)
