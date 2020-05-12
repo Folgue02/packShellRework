@@ -282,6 +282,9 @@ try:
 except JSONDecodeError:
 	raise Exception("There is something wrong in the plugin configuration file, maybe its corrupted.")
 
+except FileNotFoundError:
+	plugFile.writeConfigFile("{}") # Create an empty configuration file.
+	raise Exception("The configuration file didn't exist at the moment the packShell was initialized, now it's been already created.")
 
 if __name__ == "__main__":
 	print("Initializing shell...")
