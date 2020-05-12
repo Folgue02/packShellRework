@@ -199,6 +199,16 @@ def installPlugin(path, arguments):
 		print(f"Plugin installed as '{pluginName}'.")
 
 
+def executeSystemCommand(path, pars):
+	result = ""
+
+	for par in pars:
+		result += par + " "
+
+
+	os.system(result)
+
+
 
 
 def executePlugin(path, arguments):
@@ -299,7 +309,8 @@ if __name__ == "__main__":
 		"run": scriptExecuter(variables.mainShell).ExecuteScript,
 		"showcontent": showContent.showContent,
 		"cat":showContent.showContent,
-		"curl":curl.showWebContent
+		"curl":curl.showWebContent,
+		"console":executeSystemCommand
 	}
 	variables.mainShell.addons = addons
 	variables.mainShell.lastCommand = executePlugin
