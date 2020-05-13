@@ -70,6 +70,47 @@ class shell:
 			return 0
 
 		else:
+			result = []
+
+			# Variables
+			for par in self.userinput:			
+				x = False # This indicates if the parser is in a variable calling or not
+				foo = "" # Stores temporarily the string
+				par += " " # The parameter that is going to be parsed
+				fooVar = "" # The temporaral variable for the variable name in case that there is a varible call
+
+				for char in par:
+					
+					if char == "$":
+						# If the start of the variable has been already declarated
+						if x:
+							if not fooVar in self.variables:
+								foo += "NULL"
+ 
+							else:
+								foo += str(self.variables[fooVar]) 
+
+
+							x = False
+							fooVar = ""
+							continue
+
+
+						else:
+							x = True
+							continue
+
+					if x:
+						fooVar += char
+						continue
+
+					else:
+						foo += char
+
+				result.append(foo.strip())
+
+			self.userinput = result
+
 			command = self.userinput[0]
 			args = []
 
@@ -344,7 +385,10 @@ class syntax:
 		for char in target:
 
 			# Element transition
-			if char == " " and foo != "" and not quoteStatus:
+			if char == " " and not quoteStatus:
+				if foo == "":
+					continue
+
 				result.append(foo)
 				foo = ""
 				continue
@@ -418,7 +462,6 @@ class miscellaneous:
 
 		except ValueError:
 			return False
-
 
 if __name__ == "__main__":
 	print("This file is a library, cannot be run.")
