@@ -130,9 +130,6 @@ class shell:
 		else:
 			try:
 				os.chdir(args[0])
-
-				print(f"Current path changed to: '{os.getcwd()}'")
-
 			except FileNotFoundError:
 				print(f"Path doesn't exist: {args[0]}")
 				return

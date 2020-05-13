@@ -202,6 +202,11 @@ def installPlugin(path, arguments):
 def executeSystemCommand(path, pars):
 	result = ""
 
+
+	if len(pars) == 0:
+		os.system("cmd")
+		return
+
 	for par in pars:
 		result += par + " "
 
@@ -310,7 +315,7 @@ if __name__ == "__main__":
 		"showcontent": showContent.showContent,
 		"cat":showContent.showContent,
 		"curl":curl.showWebContent,
-		"console":executeSystemCommand
+		"console":executeSystemCommand,
 	}
 	variables.mainShell.addons = addons
 	variables.mainShell.lastCommand = executePlugin
