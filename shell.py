@@ -157,7 +157,7 @@ class shell:
 							"There are two arguments parsed into the 'lastCommand' function, current path, and arguments.")
 
 					except Exception as error:
-						print(f"An error has occurred while trying to execute the 'lastCommand' function:\n{error}")
+						print(f"An error has occurred while trying to execute the 'lastCommand' function:\n{error}\nError type: {type(error)}")
 
 
 	# Commands ----------------------------------------------------------
@@ -372,6 +372,21 @@ class graphics:
 
 
 class syntax:
+	@staticmethod
+	def separateParsSettings(parameters):
+		pars, settings = [], []
+
+		for par in parameters:
+			if par.startswith("--"):
+				settings.append(par)
+
+			else:
+				pars.append(par)
+
+		return {"parameters":pars, "settings": settings}
+
+
+
 	@staticmethod
 	def parseString(target):
 		foo = ""
