@@ -10,7 +10,7 @@ from runscript import scriptExecuter
 
 # This folder is going to contain the most part of the addons that are not builtin
 from addons import showContent, curl, move
-
+del argv[0]
 
 
 class variables:
@@ -19,6 +19,9 @@ class variables:
 	pluginPath = packPath + "addons"
 	configFilePath = f"{pluginPath}\\config.json"
 	pluginConfig = {}
+
+	pars = shell.syntax.separateParsSettings(argv)["parameters"]
+	settings = shell.syntax.separateParsSettings(argv)["settings"]
 	requirementsForPlugin = {
 		"required":[
 			"file",
@@ -279,11 +282,17 @@ def explorePlugins(path, arguments):
 ## Initialization
 
 
-if "--debug" in argv:
+if "--debug" in variables.settings:
 	variables.DEBUG = True
 
-if "--openfolder" in argv:
-	os.system("explorer " + variables.pluginPath)
+if "--start-directory" in variables.settings:
+	if len(variables.pars) == 0:
+		print("You must specify the path.")
+		exit()
+
+	variables.mainShell.executeInput(f"cd {variables.pars[0]}")
+
+
 
 # Needs to be rewrite, it can cause problems due to different folder existance
 if not os.path.isdir(variables.packPath) or not os.path.isdir(variables.pluginPath):
