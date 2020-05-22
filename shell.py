@@ -140,6 +140,14 @@ class shell:
 				self.setVariable(args)
 				return
 
+			if command == "import":
+				self.importVariables(args)
+				return
+
+			if command == "export":
+				self.exportVariables(args)
+				return
+
 			else:
 				#Check if the command is in the addon dictionary
 				
@@ -281,12 +289,9 @@ class shell:
 				for variable in self.variables:
 					print(f"\t[{variable}]: {self.variables[variable]}")
 
-
-
 		else:
 			varName = args[0]
 			value = ""
-
 
 			if len(args) >= 2:
 				value = args[1]
@@ -315,18 +320,57 @@ class shell:
 				else:
 					raise Exception(f"Too many / few arguments, number of arguments: '{len(args)}'")
 
-
-
 			try:
 				value = int(value)
 			except ValueError:
 				pass
 
-
 			self.variables[varName] = value
 
 
+	def importVariables(self, pars):
+		if len(pars) == 0:
+			raise Exception("You didn't specify the path of the file to import.")
 
+		else:
+			if "--help" in pars:
+				print("Imports variables from a file.")
+				print("\tmove $file$")
+				return
+
+			else:
+				content = json.loads(open(pars[0], "r").read())
+				for key in content:
+					if type(content[key]) != str and type(content[key]) != int:
+						raise Exception(f"Invalid variable type: '{type(content[key])}'")
+					else:
+						self.variables[key] = content[key]
+
+
+	def exportVariables(self, pars):
+		if len(pars) == 0:
+			raise Exception("Name of output file not specified.")
+
+		if pars[0] == "--help":
+			print("Exports the variables set in the current session into a file.")
+			print("Usage:")
+			print("\texport $outputfile$")
+			return
+
+
+		else:
+			outputFile = pars[0]
+
+			if os.path.isfile(outputFile):
+				raise Exception("The output file specified already exists.")
+
+			else:
+				try:
+					open(outputFile, "w").write(json.dumps(self.variables, indent=2))
+					print(f"Variables exported into '{outputFile}'")
+				
+				except PermissionError:
+					raise Exception("Permission denied.")
 
 	def listdir(self, args):
 		path = os.getcwd()

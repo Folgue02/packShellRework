@@ -9,7 +9,7 @@ from shutil import copyfile
 from runscript import scriptExecuter
 
 # This folder is going to contain the most part of the addons that are not builtin
-from addons import showContent, curl, move
+from addons import showContent, curl, move, touch
 del argv[0]
 
 
@@ -325,7 +325,8 @@ if __name__ == "__main__":
 		"cat":showContent.showContent,
 		"curl":curl.showWebContent,
 		"console":executeSystemCommand,
-		"move":move.moveFile
+		"move":move.moveFile,
+		"touch":touch.touchFile
 	}
 	variables.mainShell.addons = addons
 	variables.mainShell.lastCommand = executePlugin
