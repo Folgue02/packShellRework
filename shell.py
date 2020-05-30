@@ -18,6 +18,9 @@ class shell:
 		self.addons = addons
 		self.lastCommand = lastCommand
 		self.variables = {}
+
+		# This dictionary will contain keys (command names) that will refer to arrays of strings (orders)
+		self.customCommands = {}
 		os.chdir(path)
 
 		if not callable(lastCommand) and lastCommand != None:
@@ -117,6 +120,10 @@ class shell:
 			# Arguments available
 			if len(self.userinput) > 1:
 				args = self.userinput[1:]
+
+			# Empty input // This should happen in the terminal, but in scripts its possible to happen
+			if command == "":
+				return
 
 
 			# builtin commands

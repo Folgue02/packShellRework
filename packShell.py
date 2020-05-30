@@ -20,6 +20,7 @@ class variables:
 	configFilePath = f"{pluginPath}\\config.json"
 	pluginConfig = {}
 
+
 	pars = shell.syntax.separateParsSettings(argv)["parameters"]
 	settings = shell.syntax.separateParsSettings(argv)["settings"]
 	requirementsForPlugin = {
@@ -36,6 +37,9 @@ class variables:
 	mainShell = shell.shell(
 		prompt = f"{colored(getuser(), 'magenta')}@{colored('$D', 'green')}:",
 	)
+	# This class is the one that handles all the external scripts, such as running scripts from files or importing them as functions
+	externalScriptHandler = scriptExecuter(mainShell)
+
 
 
 class plugFile:
@@ -234,6 +238,8 @@ def executePlugin(path, arguments):
 	
 	parsedParameters = ""
 	currentConfig = plugFile.readConfigFile()
+
+	# Search for the command in the available plugins list
 	if command in currentConfig:
 		try:
 			if variables.DEBUG:
@@ -254,6 +260,12 @@ def executePlugin(path, arguments):
 		except Exception as e:
 			print(f"Couldn't run the plugin due to the following reason: {e}\nCommand tried to be executed:{variables.pluginConfig[command]['file'] + parsedParameters}")
 			return
+
+	# Search for the command in the custom commands array in the mainShell object
+	if command in variables.mainShell.customCommands:
+		variables.externalScriptHandler.runFunction(command, arguments)
+
+
 
 	else:
 		print(f"Cannot recognize the input as a command or order: '{command}'")
@@ -320,13 +332,14 @@ if __name__ == "__main__":
 		"removeplugin":removePlugin,
 		"help":getPluginHelp,
 		"echo":write,
-		"run": scriptExecuter(variables.mainShell).ExecuteScript,
+		"run": variables.externalScriptHandler.ExecuteScript,
 		"showcontent": showContent.showContent,
 		"cat":showContent.showContent,
 		"curl":curl.showWebContent,
 		"console":executeSystemCommand,
 		"move":move.moveFile,
-		"touch":touch.touchFile
+		"touch":touch.touchFile,
+		"importfunction":variables.externalScriptHandler.importFunction
 	}
 	variables.mainShell.addons = addons
 	variables.mainShell.lastCommand = executePlugin
