@@ -58,10 +58,26 @@ class scriptExecuter:
 			self.shell.customCommands[commandName] = parsedOrders
 
 	def runFunction(self, command, arguments):
-		# Executes a func stored
+		# Executes a func that was stored.
+
+		auxVarNames = []
+
+		# Turn the argumets into temporal variables inside the shell
+		for x in range(len(arguments)):
+			auxVarNames.append("%"+str(x))
+			self.shell.auxVars["%"+str(x)] = arguments[x]
+
 
 		targetFunction = self.shell.customCommands[command]
 
 		for order in targetFunction:
 			self.shell.executeInput(order)
+
+		# When the scripts ends, the temporary variables are deleted
+		for variable in auxVarNames:
+			try:
+				del self.shell.auxVars[variable]
+
+			except KeyError:
+				raise Exception("Internal error, an attempt of deleting auxiliar variable was made and failed.")
 

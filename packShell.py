@@ -270,7 +270,6 @@ def executePlugin(path, arguments):
 	else:
 		print(f"Cannot recognize the input as a command or order: '{command}'")
 
-	 
 
 
 

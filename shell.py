@@ -3,8 +3,6 @@ Appart from containing the class object of shell
 this file also contains some miscellaneous tools, such as syntax parsing
 """
 
-
-
 import os
 from datetime import datetime
 import json
@@ -18,6 +16,7 @@ class shell:
 		self.addons = addons
 		self.lastCommand = lastCommand
 		self.variables = {}
+		self.auxVars = {}
 
 		# This dictionary will contain keys (command names) that will refer to arrays of strings (orders)
 		self.customCommands = {}
@@ -25,8 +24,6 @@ class shell:
 
 		if not callable(lastCommand) and lastCommand != None:
 			raise Exception(f"The last command is not callable, object type: {type(lastCommand)}")
-
-
 
 	def changePrompt(self, newPrompt):
 		"""
@@ -36,7 +33,6 @@ class shell:
 		$T -> current time\n
 		"""
 		self._prompt = newPrompt
-
 
 	def askForInput(self):
 		"""
@@ -48,9 +44,9 @@ class shell:
 		if "$D" in prompt:
 			prompt = prompt.replace("$D", os.getcwd())
 
-
 		if "$T" in prompt:
-			prompt = prompt.replace("$T", f"{datetime.today().hour}:{datetime.today().minute}:{datetime.today().second}")
+			prompt = prompt.replace("$T",
+									f"{datetime.today().hour}:{datetime.today().minute}:{datetime.today().second}")
 
 		userinput = syntax.parseString(input(prompt))
 		self.userinput = userinput
@@ -68,7 +64,6 @@ class shell:
 		if newInput != None:
 			self.userinput = syntax.parseString(newInput)
 
-
 		if len(self.userinput) == 0:
 			return 0
 
@@ -76,23 +71,29 @@ class shell:
 			result = []
 
 			# Variables
-			for par in self.userinput:			
-				x = False # This indicates if the parser is in a variable calling or not
-				foo = "" # Stores temporarily the string
-				par += " " # The parameter that is going to be parsed
-				fooVar = "" # The temporaral variable for the variable name in case that there is a varible call
+			for par in self.userinput:
+				x = False  # This indicates if the parser is in a variable calling or not
+				foo = ""  # Stores temporarily the string
+				par += " "  # The parameter that is going to be parsed
+				fooVar = ""  # The temporaral variable for the variable name in case that there is a varible call
 
 				for char in par:
-					
+
 					if char == "$":
 						# If the start of the variable has been already declarated
 						if x:
-							if not fooVar in self.variables:
+							# In case that the variable doesn't exist.
+							if not fooVar in self.variables and not fooVar in self.auxVars:
 								foo += "NULL"
- 
-							else:
-								foo += str(self.variables[fooVar]) 
 
+							else:
+								# Check if the variable is an special variable
+								if fooVar.startswith("%") and fooVar in self.auxVars:
+									print("sd")
+									foo += str(self.auxVars[fooVar])
+
+								else:
+									foo += str(self.variables[fooVar])
 
 							x = False
 							fooVar = ""
@@ -125,7 +126,6 @@ class shell:
 			if command == "":
 				return
 
-
 			# builtin commands
 			if command == "changedir" or command == "cd":
 				self.changedir(args)
@@ -142,7 +142,7 @@ class shell:
 			if command == "listdir" or command == "ls":
 				self.listdir(args)
 				return
-			
+
 			if command == "set":
 				self.setVariable(args)
 				return
@@ -156,8 +156,8 @@ class shell:
 				return
 
 			else:
-				#Check if the command is in the addon dictionary
-				
+				# Check if the command is in the addon dictionary
+
 				if command in self.addons:
 					self.addons[command](os.getcwd(), args)
 					return
@@ -168,14 +168,13 @@ class shell:
 						self.lastCommand(os.getcwd(), args)
 
 					except TypeError:
-						raise Exception("This function looks like it's not set for being called as the shell does.\n"+
-							"There are two arguments parsed into the 'lastCommand' function, current path, and arguments.")
+						raise Exception("This function looks like it's not set for being called as the shell does.\n" +
+										"There are two arguments parsed into the 'lastCommand' function, current path, and arguments.")
 
 					except Exception as error:
 						print(f"An error has occurred while trying to execute the 'lastCommand' function:\n{error}\nError type: {type(error)}")
 
-
-	# Commands ----------------------------------------------------------
+# Commands ----------------------------------------------------------
 
 	def changedir(self, args):
 		currentPath = os.getcwd()
@@ -228,7 +227,6 @@ class shell:
 				except IndexError:
 					print(f"Element name not specified")
 
-
 				return
 
 		# Delete element
@@ -273,8 +271,6 @@ class shell:
 		else:
 			raise Exception("The type of action specified doesn't fit to the availables.")
 
-
-
 	def setVariable(self, args):
 		"""
 		Shows all the available variables, or sets a new one
@@ -291,6 +287,8 @@ class shell:
 				print("There are no variables set.")
 				return
 
+
+
 			else:
 				print(graphics.createTitle("AVAILABLE VARIABLES:"))
 				for variable in self.variables:
@@ -300,19 +298,23 @@ class shell:
 			varName = args[0]
 			value = ""
 
+			# This char is reserved for auxiliar variables.
+			if "%" in varName:
+				print("Invalid character inside the variable name specified.")
+				return
+
 			if len(args) >= 2:
 				value = args[1]
 
 			if "--input" in settings:
 				newPrompt = ""
-				
 
 				# A prompt can be set by putting a second argument (not considering the options)
 				if len(args) == 2:
 					newPrompt = args[1]
 
 				value = input(newPrompt)
-				
+
 			if "--delete" in settings:
 				if len(args) == 1:
 					varName = args[0]
@@ -329,30 +331,32 @@ class shell:
 
 			try:
 				value = int(value)
+
 			except ValueError:
 				pass
 
 			self.variables[varName] = value
 
-
 	def importVariables(self, pars):
+		# Import the variables into the shell instance
 		if len(pars) == 0:
 			raise Exception("You didn't specify the path of the file to import.")
 
 		else:
 			if "--help" in pars:
 				print("Imports variables from a file.")
-				print("\tmove $file$")
+				print("\timport $file$")
 				return
 
 			else:
 				content = json.loads(open(pars[0], "r").read())
+
+				# Adds the new variables to the self.variables
 				for key in content:
 					if type(content[key]) != str and type(content[key]) != int:
 						raise Exception(f"Invalid variable type: '{type(content[key])}'")
 					else:
 						self.variables[key] = content[key]
-
 
 	def exportVariables(self, pars):
 		if len(pars) == 0:
@@ -375,7 +379,7 @@ class shell:
 				try:
 					open(outputFile, "w").write(json.dumps(self.variables, indent=2))
 					print(f"Variables exported into '{outputFile}'")
-				
+
 				except PermissionError:
 					raise Exception("Permission denied.")
 
@@ -400,12 +404,6 @@ class shell:
 			print("\t" + directory)
 
 
-
-
-
-
-
-
 class graphics:
 	@staticmethod
 	def createErrorLog(msg):
@@ -417,9 +415,6 @@ class graphics:
 	@staticmethod
 	def createTitle(msg):
 		return f"------------ {msg}"
-
-
-
 
 
 class syntax:
@@ -434,9 +429,7 @@ class syntax:
 			else:
 				pars.append(par)
 
-		return {"parameters":pars, "settings": settings}
-
-
+		return {"parameters": pars, "settings": settings}
 
 	@staticmethod
 	def parseString(target):
@@ -475,7 +468,7 @@ class syntax:
 
 		return result
 
-	@staticmethod 
+	@staticmethod
 	def parseParsedString(string):
 		"""
 		This function returns a dictionary that contains the already parsed parsed version of the string specified
@@ -491,9 +484,7 @@ class syntax:
 			if len(string) > 1:
 				arguments = string[1:]
 
-
-		return {"command":command, "args":arguments}
-
+		return {"command": command, "args": arguments}
 
 
 class miscellaneous:
@@ -509,9 +500,10 @@ class miscellaneous:
 
 		else:
 			nodes = os.listdir(path)
-			result = [[],[]]
+			result = [[], []]
+
 			for node in nodes:
-				if os.path.isfile(os.path.normpath(path)+ "\\" + node):
+				if os.path.isfile(os.path.normpath(path) + "\\" + node):
 					result[0].append(node)
 					continue
 
@@ -529,8 +521,6 @@ class miscellaneous:
 		except ValueError:
 			return False
 
+
 if __name__ == "__main__":
 	print("This file is a library, cannot be run.")
-
-
-
